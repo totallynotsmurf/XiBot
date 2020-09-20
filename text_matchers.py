@@ -42,7 +42,7 @@ class sentiment_less_than:
         self.value = value
 
     def __call__(self, string):
-        return TextBlob(string).sentiment <= self.value
+        return TextBlob(string).sentiment.polarity <= self.value
 
 
 class sentiment_more_than:
@@ -50,7 +50,7 @@ class sentiment_more_than:
         self.value = value
 
     def __call__(self, string):
-        return TextBlob(string).sentiment >= self.value
+        return TextBlob(string).sentiment.polarity >= self.value
 
 
 class logical_and:
