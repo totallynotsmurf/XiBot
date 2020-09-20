@@ -76,7 +76,7 @@ response_map = [
     ),
     (
         logical_and(
-            if_contains('communis', 'jinping', 'mao'),
+            if_contains('communis', 'jinping', 'mao', 'ccp'),
             logical_not(if_contains('capitalis')),
             sentiment_less_than(-0.3)
         ),
