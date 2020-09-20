@@ -72,7 +72,7 @@ response_map = [
             logical_not(if_contains('capitalis')),
             sentiment_more_than(0.2)
         ),
-        lambda _: 'Your social Credit Score has been raised by ' + str(random.randint(5, 25)) + ' points.'
+        lambda _: 'Your Social Credit Score has been raised by ' + str(random.randint(5, 25)) + ' points.'
     ),
     (
         logical_and(
@@ -80,7 +80,7 @@ response_map = [
             logical_not(if_contains('capitalis')),
             sentiment_less_than(-0.2)
         ),
-        lambda _: 'Your social Credit Score has been lowered by ' + str(random.randint(25, 100)) + ' points.'
+        lambda _: 'Your Social Credit Score has been lowered by ' + str(random.randint(25, 100)) + ' points.'
     ),
     (
         # Takes priority over other ROC mentions.
