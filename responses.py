@@ -97,6 +97,18 @@ response_map = [
     (
         if_contains('china sea'),
         lambda _: 'Rightful Chinese territory.'
+    ),
+    (
+        if_contains('twitter', 'facebook', 'instagram', 'snapchat', 'whatsapp'),
+        lambda _: 'Did you mean WeChat?'
+    ),
+    (
+        if_contains('amazon'),
+        lambda _: 'Did you mean Alibaba?'
+    ),
+    (
+        if_contains('corona', 'covid', 'wuhan', 'bat soup'),
+        lambda _: 'There is nothing going on in Wuhan. Please mind your own business.'
     )
 ]
 
