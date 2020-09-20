@@ -1,3 +1,5 @@
+from textblob import TextBlob
+
 from common import *
 
 import re
@@ -33,6 +35,22 @@ class if_contains_word:
                 ): return True
 
         return False
+
+
+class sentiment_less_than:
+    def __init__(self, value):
+        self.value = value
+
+    def __call__(self, string):
+        return TextBlob(string).sentiment <= self.value
+
+
+class sentiment_more_than:
+    def __init__(self, value):
+        self.value = value
+
+    def __call__(self, string):
+        return TextBlob(string).sentiment >= self.value
 
 
 class logical_and:

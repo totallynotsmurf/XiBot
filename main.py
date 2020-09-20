@@ -21,9 +21,9 @@ def on_chat_name_changed(update, context):
         return any([s in name for s in list(strings)])
 
 
-    if any_in_name('communist', 'marx', 'lenin', 'stalin'):
+    if any_in_name('communis', 'marx', 'lenin', 'stalin', 'jinping'):
         send_image_reply(update, context, 'happy_xi.jpg')
-    elif any_in_name('uyghur', 'capitalist'):
+    elif any_in_name('uyghur', 'capitalis'):
         send_image_reply(update, context, 'sad_xi.jpg')
 
 

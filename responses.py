@@ -67,6 +67,22 @@ response_map = [
         lambda _: 'Your Social Credit Score has been lowered by ' + str(random.randint(25, 100)) + ' points.'
     ),
     (
+        logical_and(
+            if_contains('communis', 'jinping', 'mao'),
+            logical_not(if_contains('capitalis')),
+            sentiment_more_than(0.3)
+        ),
+        lambda _: 'Your social Credit Score has been raised by ' + str(random.randint(5, 25)) + ' points.'
+    ),
+    (
+        logical_and(
+            if_contains('communis', 'jinping', 'mao'),
+            logical_not(if_contains('capitalis')),
+            sentiment_less_than(-0.3)
+        ),
+        lambda _: 'Your social Credit Score has been lowered by ' + str(random.randint(25, 100)) + ' points.'
+    ),
+    (
         # Takes priority over other ROC mentions.
         if_matches(r'taiwan numb[a|e]r? [(one)|1]'),
         lambda _: 'This is by far the most disgusting thing I\'ve read all day.'
@@ -95,11 +111,11 @@ response_map = [
         lambda _: 'Long live the Communist Party, long live our Glorious Homeland!'
     ),
     (
-        if_contains('china sea'),
-        lambda _: 'Rightful Chinese territory.'
+        if_contains('china sea', 'chinese sea'),
+        lambda _: 'Rightful Chinese territory! It\'s in the name!'
     ),
     (
-        if_contains('twitter', 'facebook', 'instagram', 'snapchat', 'whatsapp'),
+        if_contains('twitter', 'facebook', 'instagram', 'snapchat', 'whatsapp', 'telegram', 'discord'),
         lambda _: 'Did you mean WeChat?'
     ),
     (
