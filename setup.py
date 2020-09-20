@@ -1,14 +1,16 @@
 import os
+import sys
 
 
+interp   = str(sys.executable)
 commands = [
-    'pip install python-telegram-bot',
-    'pip install textblob',
-    'python -m textblob.download_corpora'
+    '-m pip install python-telegram-bot',
+    '-m pip install textblob',
+    '-m textblob.download_corpora'
 ]
 
 
 for command in commands:
-    os.system(command)
+    os.system(interp + ' ' + command)
 
 print('All done.')
