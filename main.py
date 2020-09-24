@@ -14,22 +14,10 @@ updater    = Updater(token = token, use_context = True)
 dispatcher = updater.dispatcher
 
 
-def on_chat_name_changed(update, context):
-    name = updater.bot.getChat(update.effective_chat.id).title.lower()
+def bind_updater(fn): return lambda u, c: fn(updater, u, c)
 
-    def any_in_name(*strings):
-        return any([s in name for s in list(strings)])
-
-
-    if any_in_name('communist', 'marx', 'lenin', 'stalin'):
-        send_image_reply(update, context, 'happy_xi.jpg')
-    elif any_in_name('uyghur', 'capitalist'):
-        send_image_reply(update, context, 'sad_xi.jpg')
-
-
-
-dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_title, on_chat_name_changed))
+dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_title, bind_updater(on_chat_name_changed)))
 dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, lambda u, c: send_reply(u, c, 'Ni Hao!')))
-dispatcher.add_handler(MessageHandler(Filters.all, respond))
+dispatcher.add_handler(MessageHandler(Filters.all, bind_updater(respond)))
 
 updater.start_polling()

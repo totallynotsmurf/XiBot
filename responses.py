@@ -3,6 +3,7 @@ from text_matchers import *
 
 import re
 import random
+import time
 
 
 # Make the message lower case, remove special characters and repeated whitespace and transform all whitespace
@@ -67,6 +68,22 @@ response_map = [
         lambda _: 'Your Social Credit Score has been lowered by ' + str(random.randint(25, 100)) + ' points.'
     ),
     (
+        logical_and(
+            if_contains('communis', 'jinping', 'mao'),
+            logical_not(if_contains('capitalis')),
+            sentiment_more_than(0.2)
+        ),
+        lambda _: 'Your Social Credit Score has been raised by ' + str(random.randint(5, 25)) + ' points.'
+    ),
+    (
+        logical_and(
+            if_contains('communis', 'jinping', 'mao', 'ccp'),
+            logical_not(if_contains('capitalis')),
+            sentiment_less_than(-0.2)
+        ),
+        lambda _: 'Your Social Credit Score has been lowered by ' + str(random.randint(25, 100)) + ' points.'
+    ),
+    (
         # Takes priority over other ROC mentions.
         if_matches(r'taiwan numb[a|e]r? [(one)|1]'),
         lambda _: 'This is by far the most disgusting thing I\'ve read all day.'
@@ -95,8 +112,20 @@ response_map = [
         lambda _: 'Long live the Communist Party, long live our Glorious Homeland!'
     ),
     (
-        if_contains('china sea'),
-        lambda _: 'Rightful Chinese territory.'
+        if_contains('china sea', 'chinese sea'),
+        lambda _: 'Rightful Chinese territory! It\'s in the name!'
+    ),
+    (
+        if_contains('twitter', 'facebook', 'instagram', 'snapchat', 'whatsapp', 'telegram', 'discord'),
+        lambda _: 'Did you mean WeChat?'
+    ),
+    (
+        if_contains('amazon'),
+        lambda _: 'Did you mean Alibaba?'
+    ),
+    (
+        if_contains('corona', 'covid', 'wuhan', 'bat soup'),
+        lambda _: 'There is nothing going on in Wuhan. Please mind your own business.'
     )
 ]
 
@@ -110,9 +139,17 @@ def process_message(message):
 
 
 
-def respond(update, context):
+def respond(updater, update, context):
     text = update.message.text
     if text is None: return
+
+
+    if text[0:8] == '/revolve':
+        # Bot name change doesnt trigger the event, so do it manually.
+        time.sleep(2)
+        on_chat_name_changed(updater, update, context)
+        return
+
 
     response = process_message(text)
     if response is not None:
@@ -120,3 +157,18 @@ def respond(update, context):
             send_image_reply(update, context, response[len('<image>'):])
         else:
             send_reply(update, context, response)
+
+
+
+def on_chat_name_changed(updater, update, context):
+    name = normalize_message(updater.bot.getChat(update.effective_chat.id).title)
+
+    def any_in_name(*strings):
+        return any([s in name for s in list(strings)])
+
+
+    if any_in_name('communis', 'marx', 'lenin', 'stalin', 'jinping'):
+        send_image_reply(update, context, 'happy_xi.jpg')
+    elif any_in_name('uyghur', 'capitalis'):
+        send_image_reply(update, context, 'sad_xi.jpg')
+
