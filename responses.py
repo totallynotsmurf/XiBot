@@ -3,6 +3,7 @@ from text_matchers import *
 
 import re
 import random
+import time
 
 
 # Make the message lower case, remove special characters and repeated whitespace and transform all whitespace
@@ -138,9 +139,17 @@ def process_message(message):
 
 
 
-def respond(update, context):
+def respond(updater, update, context):
     text = update.message.text
     if text is None: return
+
+
+    if text[0:8] == '/revolve':
+        # Bot name change doesnt trigger the event, so do it manually.
+        time.sleep(2)
+        on_chat_name_changed(updater, update, context)
+        return
+
 
     response = process_message(text)
     if response is not None:
@@ -148,3 +157,18 @@ def respond(update, context):
             send_image_reply(update, context, response[len('<image>'):])
         else:
             send_reply(update, context, response)
+
+
+
+def on_chat_name_changed(updater, update, context):
+    name = normalize_message(updater.bot.getChat(update.effective_chat.id).title)
+
+    def any_in_name(*strings):
+        return any([s in name for s in list(strings)])
+
+
+    if any_in_name('communis', 'marx', 'lenin', 'stalin', 'jinping'):
+        send_image_reply(update, context, 'happy_xi.jpg')
+    elif any_in_name('uyghur', 'capitalis'):
+        send_image_reply(update, context, 'sad_xi.jpg')
+
