@@ -69,7 +69,10 @@ response_map = [
     ),
     (
         logical_and(
-            if_contains('communis', 'jinping', 'mao'),
+            logical_or(
+                if_contains('communis', 'jinping'),
+                if_contains_word('mao', 'ccp')
+            ),
             logical_not(if_contains('capitalis')),
             sentiment_more_than(0.2)
         ),
@@ -132,6 +135,10 @@ response_map = [
     (
         if_contains('corona', 'covid', 'wuhan', 'bat soup', 'bat soop'),
         lambda _: 'There is nothing going on in Wuhan. Please mind your own business.'
+    ),
+    (
+        if_contains('capitalis'),
+        lambda _: 'Capitalism bad.'
     )
 ]
 
