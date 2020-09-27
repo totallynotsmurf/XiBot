@@ -19,6 +19,11 @@ def send_image_reply(update, context, image_name):
         update.message.reply_photo(image_file)
 
 
+def send_image_message(updater, chat_id, image_name):
+    with open(path.join(asset_folder, image_name), 'rb') as image_file:
+        updater.bot.send_photo(chat_id, image_file)
+
+
 
 def string_find_all(string, substring):
     result = []
