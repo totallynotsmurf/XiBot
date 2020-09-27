@@ -141,7 +141,7 @@ response_map = [
         lambda _: 'Capitalism bad.'
     ),
     (
-        logical_or(if_contains('otter'), if_contains_word('otta')),
+        logical_or(if_contains('otter'), if_contains_word('otta', 'ottas')),
         lambda _: '<image>commie.jpg'
     )
 ]
