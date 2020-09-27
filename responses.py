@@ -77,7 +77,10 @@ response_map = [
     ),
     (
         logical_and(
-            if_contains('communis', 'jinping', 'mao', 'ccp'),
+            logical_or(
+                if_contains('communis', 'jinping'),
+                if_contains_word('mao', 'ccp')
+            ),
             logical_not(if_contains('capitalis')),
             sentiment_less_than(-0.2)
         ),
@@ -89,7 +92,10 @@ response_map = [
         lambda _: 'This is by far the most disgusting thing I\'ve read all day.'
     ),
     (
-        if_contains('mad dog', 'xiaodong'),
+        logical_or(
+            if_contains('mad dog', 'xiaodong'),
+            if_contains_word('ching', 'chong', 'chink')
+        ),
         lambda _: 'Please cease disrespecting Chinese culture immediately.'
     ),
     (
@@ -124,7 +130,7 @@ response_map = [
         lambda _: 'Did you mean Alibaba?'
     ),
     (
-        if_contains('corona', 'covid', 'wuhan', 'bat soup'),
+        if_contains('corona', 'covid', 'wuhan', 'bat soup', 'bat soop'),
         lambda _: 'There is nothing going on in Wuhan. Please mind your own business.'
     )
 ]
