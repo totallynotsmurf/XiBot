@@ -22,15 +22,17 @@ class revbot_listener:
             connection = self.listener.accept()
 
             while True:
-                message = connection.recv()
+                try:
+                    message = connection.recv()
 
-                if isinstance(message, tuple) and len(message) == 2:
-                    with self.lock:
-                        if message[0] in self.handlers:
-                            for handler in self.handlers[message[0]]: handler(self.updater, message[1])
+                    if isinstance(message, tuple) and len(message) == 2:
+                        with self.lock:
+                            if message[0] in self.handlers:
+                                for handler in self.handlers[message[0]]: handler(self.updater, message[1])
 
-                else:
-                    print('[RevBot Listener]: Received invalid message.')
+                    else:
+                        print('[RevBot Listener]: Received invalid message.')
+                except EOFError: connection = self.listener.accept()
 
         start_new_thread(thread_loop, ())
 
