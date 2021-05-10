@@ -1,5 +1,9 @@
+import types
+from typing import Union, Callable
+
 from common import *
 from text_matchers import *
+from reputation import *
 
 import re
 import random
@@ -46,6 +50,16 @@ def mentions_prc(string):
     return if_matches(prc_regex)(string)
 
 
+def score_changed_message(amount):
+    return f'Your Social Credit Score has been {"raised" if amount > 0 else "lowered"} by {str(abs(amount))} points.'
+
+def update_score(update, a, b, message: Union[str, Callable] = score_changed_message):
+    amount = random.randint(min(a, b), max(a, b))
+    update_reputation(amount, update)
+
+    if isinstance(message, str): return message
+    else: return message(amount)
+
 
 response_map = [
     (
@@ -65,7 +79,7 @@ response_map = [
                 '1989', 'dalai', 'pooh'
             )
         ),
-        lambda _: 'Your Social Credit Score has been lowered by ' + str(random.randint(25, 100)) + ' points.'
+        lambda update: update_score(update, -25, -100)
     ),
     (
         logical_and(
@@ -76,7 +90,7 @@ response_map = [
             logical_not(if_contains('capitalis')),
             sentiment_more_than(0.2)
         ),
-        lambda _: 'Your Social Credit Score has been raised by ' + str(random.randint(5, 25)) + ' points.'
+        lambda update: update_score(update, 25, 50)
     ),
     (
         logical_and(
@@ -87,27 +101,27 @@ response_map = [
             logical_not(if_contains('capitalis')),
             sentiment_less_than(-0.2)
         ),
-        lambda _: 'Your Social Credit Score has been lowered by ' + str(random.randint(25, 100)) + ' points.'
+        lambda update: update_score(update, -25, -100)
     ),
     (
         # Takes priority over other ROC mentions.
         if_matches(r'taiwan numb[a|e]r? [(one)|1]'),
-        lambda _: 'This is by far the most disgusting thing I\'ve read all day.'
+        lambda update: update_score(update, -250, -500, 'This is by far the most disgusting thing I\'ve read all day.')
     ),
     (
         logical_or(
             if_contains('mad dog', 'xiaodong'),
             if_contains_word('ching', 'chong', 'chink')
         ),
-        lambda _: 'Please cease disrespecting Chinese culture immediately.'
+        lambda update: update_score(update, -25, -50, 'Please cease disrespecting Chinese culture immediately.')
     ),
     (
         logical_or(if_contains('taiwan'), if_contains_word('roc'), mentions_roc),
-        lambda _: 'There is only one China. Always has been.'
+        lambda update: update_score(update, -25, -50, 'There is only one China. Always has been.')
     ),
     (
         if_contains('jinping'),
-        lambda _: 'Ni Hao!'
+        lambda update: update_score(update, 5, 10, 'Ni Hao!')
     ),
     (
         logical_or(
@@ -118,14 +132,14 @@ response_map = [
     ),
     (
         mentions_prc,
-        lambda _: 'Long live the Communist Party, long live our Glorious Homeland!'
+        lambda update: update_score(update, 50, 100, 'Long live the Communist Party, long live our Glorious Homeland!')
     ),
     (
         if_contains('china sea', 'chinese sea'),
         lambda _: 'Rightful Chinese territory! It\'s in the name!'
     ),
     (
-        if_contains('twitter', 'facebook', 'instagram', 'snapchat', 'whatsapp', 'telegram', 'discord'),
+        if_contains_word('twitter', 'facebook', 'instagram', 'snapchat', 'whatsapp', 'telegram', 'discord'),
         lambda _: 'Did you mean WeChat?'
     ),
     (
@@ -134,23 +148,23 @@ response_map = [
     ),
     (
         if_contains('corona', 'covid', 'wuhan', 'bat soup', 'bat soop'),
-        lambda _: 'There is nothing going on in Wuhan. Please mind your own business.'
+        lambda update: update_score(update, -100, -200, 'There is nothing going on in Wuhan. Please mind your own business.')
     ),
     (
         if_contains('capitalis'),
-        lambda _: 'Capitalism bad.'
+        lambda update: update_score(update, -20, -50, 'Capitalism bad.')
     ),
     (
         logical_or(if_contains('otter'), if_contains_word('otta', 'ottas')),
-        lambda _: '<image>commie.jpg'
+        lambda update: update_score(update, 5, 10, '<image>commie.jpg')
     )
 ]
 
-def process_message(message):
-    message = normalize_message(message)
+def process_message(update):
+    message = normalize_message(update.message.text)
 
     for matcher, response in response_map:
-        if matcher(message): return response(message)
+        if matcher(message): return response(update)
 
     return None
 
@@ -161,7 +175,7 @@ def respond(updater, update, context):
     if text is None: return
 
 
-    response = process_message(text)
+    response = process_message(update)
     if response is not None:
         if response.startswith('<image>'):
             send_image_reply(update, context, response[len('<image>'):])

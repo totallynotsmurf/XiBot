@@ -51,7 +51,7 @@ def on_server_name_changed(updater, arguments):
     def any_in_name(*strings):
         return any([s in chat_name for s in list(strings)])
 
-    if any_in_name('communis', 'marx', 'lenin', 'stalin', 'jinping'):
+    if any_in_name('soviet', 'communis', 'marx', 'lenin', 'stalin', 'jinping'):
         send_image_message(updater, chat_id, 'happy_xi.jpg')
     elif any_in_name('uyghur', 'capitalis'):
         send_image_message(updater, chat_id, 'sad_xi.jpg')

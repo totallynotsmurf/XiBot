@@ -2,6 +2,7 @@ from telegram import InputFile
 
 from os import path
 
+from telegram.ext import CommandHandler
 
 asset_folder = './assets/'
 
@@ -24,7 +25,6 @@ def send_image_message(updater, chat_id, image_name):
         updater.bot.send_photo(chat_id, image_file)
 
 
-
 def string_find_all(string, substring):
     result = []
 
@@ -34,3 +34,8 @@ def string_find_all(string, substring):
         last_match = string.find(substring, last_match + 1)
 
     return result
+
+
+def add_command(dispatcher, command, name):
+    handler = CommandHandler(name, command)
+    dispatcher.add_handler(handler)

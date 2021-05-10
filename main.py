@@ -2,8 +2,9 @@ from telegram.ext import Updater, MessageHandler, Filters
 
 from responses import *
 from revbot_notifier import *
+from reputation import *
+from common import *
 
-import os
 import os.path as path
 
 
@@ -17,12 +18,23 @@ listener = revbot_listener(updater)
 listener.add_handler('name_changed', on_server_name_changed)
 
 
+def command_show_reputation(update, context):
+    send_reply(update, context, f'Your current Social Credit Score is {get_reputation(update):.2f}.')
+
+
+def command_reset_reputation(update, context):
+    reset_reputation(update)
+
+
 def bind_updater(fn): return lambda u, c: fn(updater, u, c)
 def bind_args(fn): return lambda u, c: fn(updater, (u.effective_chat.id, c.bot.getChat(u.effective_chat.id).title))
-
 
 dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_title, bind_args(on_server_name_changed)))
 dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, lambda u, c: send_reply(u, c, 'Ni Hao!')))
 dispatcher.add_handler(MessageHandler(Filters.all & (~Filters.command), bind_updater(respond)))
+
+add_command(dispatcher, command_show_reputation,  'show_score')
+add_command(dispatcher, command_reset_reputation, 'reset_score')
+load_reputations()
 
 updater.start_polling()
