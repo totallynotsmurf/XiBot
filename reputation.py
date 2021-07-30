@@ -87,7 +87,7 @@ def update_reputation(delta, update):
         lower = min(old_reputation, reputation[username])
         upper = max(old_reputation, reputation[username])
 
-        if lower <= value <= upper:
+        if lower <= value < upper:
             message = actions[0] if delta < 0 else actions[1]
             reply.append(message(display_name))
 

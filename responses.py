@@ -1,6 +1,7 @@
 import types
-from typing import Union, Callable
+from typing import Union, Callable, List, Tuple
 
+from assets.file_ids import file_ids
 from common import *
 from text_matchers import *
 from reputation import *
@@ -8,6 +9,52 @@ from reputation import *
 import re
 import random
 import time
+
+
+# Select a random response from a list of responses ((fn, weight) pairs).
+def random_response(responses : List[Tuple[Callable, float]]):
+    return lambda update: random.choices(list(map(nth(0), responses)), list(map(nth(1), responses)))[0](update)
+
+
+def maybe_respond(response, probability):
+    def fn(update):
+        if random.random() < probability: return response(update)
+        else: return '<noresponse>'
+
+    return fn
+
+
+# Changes the score of the person who sent a message by the given amount.
+def score_changed_message(amount):
+    return lambda update: \
+        f'Your Social Credit Score has been {"raised" if amount > 0 else "lowered"} by {str(abs(amount))} points.'
+
+
+# Changes the score of the person who sent a message by the given amount and sends the given response.
+def change_score(a, b, wrapped = None):
+    def fn(update):
+        amount = random.randint(min(a, b), max(a, b))
+        update_reputation(amount, update)
+
+        if wrapped is not None: return wrapped(update)
+        else: return score_changed_message(amount)(update)
+
+    return fn
+
+
+def change_score_on_sentiment(a, b, threshold, wrapped = None):
+    def fn(update):
+        text = normalize_message(update.message.text)
+
+        if sentiment_more_than(threshold)(text):
+            return change_score(a, b, wrapped)(update)
+        if sentiment_less_than(-threshold)(text):
+            return change_score(-a, -b, wrapped)(update)
+        else:
+            if wrapped is not None: return wrapped(update)
+            else: return '<noresponse>'
+
+    return fn
 
 
 # Make the message lower case, remove special characters and repeated whitespace and transform all whitespace
@@ -31,98 +78,69 @@ def normalize_message(message):
     return ''.join(transformed_message)
 
 
-prc_regex = r'people\s?s?\s?repu?b?l?i?c? of china'
-roc_regex = r'repu?b?l?i?c? of china'
-
-# TODO: Optimize this.
-# Note: this only checks if the string has 'Republic of China' and not 'People's Republic of China'
-# Taiwan, ROC, etc. should be checked separately.
-def mentions_roc(string):
-    # If the message mentions 'republic of china' and not 'people's republic of china' it is talking about the ROC.
-    # If the message mentions both, figure out if the ROC mention is a substring of the PRC mention.
-    if if_matches(roc_regex)(string):
-        if not mentions_prc(string): return True
-        else: return len(re.findall(prc_regex, string)) != len(re.findall(roc_regex, string))
-
-
-
-def mentions_prc(string):
-    return if_matches(prc_regex)(string)
-
-
-def score_changed_message(amount):
-    return f'Your Social Credit Score has been {"raised" if amount > 0 else "lowered"} by {str(abs(amount))} points.'
-
-def update_score(update, a, b, message: Union[str, Callable] = score_changed_message):
-    amount = random.randint(min(a, b), max(a, b))
-    update_reputation(amount, update)
-
-    if isinstance(message, str): return message
-    else: return message(amount)
-
-
 response_map = [
+    # Messages containing the phrase 'Taiwan number one'.
     (
-        logical_and(
-            if_contains('uyghur', 'uygur', 'uyguhr'),
-            if_contains('autonomous', 'autonomy', 'rebel', 'independence', 'freedom', 'free the')
-        ),
-        lambda _: 'There is no war in B̶a̶ ̶S̶i̶n̶g̶ ̶S̶e̶ The Xinjiang Autonomous Area.'
-    ),
-    (
-        logical_or(
-            if_contains(
-                'tianman', 'tianmen', 'tiananman', 'tiananmen', 'tibet', 'hong kong', 'hongkong',
-                'uyghur', 'uygur', 'uyguhr', 'human right', 'xinjiang', 'xiaobo'
-            ),
-            if_contains_word(
-                '1989', 'dalai', 'pooh'
-            )
-        ),
-        lambda update: update_score(update, -25, -100)
-    ),
-    (
-        logical_and(
-            logical_or(
-                if_contains('communis', 'jinping'),
-                if_contains_word('mao', 'ccp')
-            ),
-            logical_not(if_contains('capitalis')),
-            sentiment_more_than(0.2)
-        ),
-        lambda update: update_score(update, 25, 50)
-    ),
-    (
-        logical_and(
-            logical_or(
-                if_contains('communis', 'jinping'),
-                if_contains_word('mao', 'ccp')
-            ),
-            logical_not(if_contains('capitalis')),
-            sentiment_less_than(-0.2)
-        ),
-        lambda update: update_score(update, -25, -100)
-    ),
-    (
-        # Takes priority over other ROC mentions.
         if_matches(r'taiwan numb[a|e]r? [(one)|1]'),
-        lambda update: update_score(update, -250, -500, 'This is by far the most disgusting thing I\'ve read all day.')
+        change_score(-250, -500, wrapped = lambda update: 'This is by far the most disgusting thing I\'ve read all day.')
     ),
+    # Messages that mention Mao Zedong or the CCP.
     (
         logical_or(
-            if_contains('mad dog', 'xiaodong'),
-            if_contains_word('ching', 'chong', 'chink')
+            if_contains_word('mao', 'ccp'),
+            if_contains('zedong', 'communist party')
         ),
-        lambda update: update_score(update, -25, -50, 'Please cease disrespecting Chinese culture immediately.')
+        change_score(25, 50, wrapped = random_response([
+            (lambda update: '<&audio>' + file_ids.red_sun_in_the_sky, 0.50),
+            (lambda update: '<&video>' + file_ids.mao_zedong_cat, 0.50)
+        ]))
     ),
+    # Messages mentioning the Social Credit system.
     (
-        logical_or(if_contains('taiwan'), if_contains_word('roc'), mentions_roc),
-        lambda update: update_score(update, -25, -50, 'There is only one China. Always has been.')
+        if_contains_word('credit', 'social score'),
+        change_score(-10, -25, wrapped = lambda update: '<image>social_credit.jpg')
     ),
+    # Messages mentioning Winnie the Pooh.
     (
-        if_contains('jinping'),
-        lambda update: update_score(update, 5, 10, 'Ni Hao!')
+        if_contains_word('pooh', 'poohbear', 'winnie'),
+        change_score(-100, -250, wrapped = random_response([
+            (lambda update: '<image>punishment.jpg', 0.6),
+            (lambda update: '<image>dinnertime.jpg', 0.3),
+            (lambda update: 'Choose your next words very carefully, capitalist scum...', 0.3)
+        ]))
     ),
+    # Mentions of the Uyghurs.
+    (
+        logical_or(
+            if_contains_word('uyghur', 'uygur', 'uyguhr', 'uighur', 'uigur', 'uiguhr'),
+            if_contains_word('xinjiang', 'xinjang')
+        ),
+        change_score(-100, -250, wrapped = random_response([
+            (lambda update: 'There is no war in B̶a̶ ̶S̶i̶n̶g̶ ̶S̶e̶ The Xinjiang Autonomous Area.', 0.7),
+            (lambda update: '<image>punishment.jpg', 0.3)
+        ]))
+    ),
+    # Mentions of Tibet or Hong Kong.
+    (
+        if_contains_word('tibet', 'dalai', 'hongkong', 'hong kong'),
+        change_score(-100, -250, wrapped = random_response([
+            (lambda update: 'Rightful Chinese clay.', 0.7),
+            (lambda update: 'Choose your next words very carefully, capitalist scum...', 0.3),
+            (lambda update: '<image>punishment.jpg', 0.3)
+        ]))
+    ),
+    # Mentions of Tiananmen Square.
+    (
+        logical_or(
+            if_contains('tianman', 'tianmen', 'tiananman', 'tiananmen', 'tianenman', 'tianenmen'),
+            if_contains_word('1989', 'student protest', 'student protests')
+        ),
+        change_score(-250, -500, wrapped = random_response([
+            (lambda update: 'I don\'t know what you\'re talking about.', 0.7),
+            (lambda update: '<image>punishment.jpg', 0.3)
+        ]))
+    ),
+    # Mentions of common electronic brands.
     (
         logical_or(
             if_contains('iphone', 'ipad', 'ipod', 'imac', 'macbook', 'foxconn', 'samsung', 'huawei', 'xiaomi', 'oneplus'),
@@ -130,35 +148,121 @@ response_map = [
         ),
         lambda _: '<image>iphone_factory.jpg'
     ),
-    (
-        mentions_prc,
-        lambda update: update_score(update, 50, 100, 'Long live the Communist Party, long live our Glorious Homeland!')
-    ),
+    # Mentions of disputed waters.
     (
         if_contains('china sea', 'chinese sea'),
         lambda _: 'Rightful Chinese territory! It\'s in the name!'
     ),
+    # Mentions of tech companies with Chinese alternatives.
     (
         if_contains_word('twitter', 'facebook', 'instagram', 'snapchat', 'whatsapp', 'telegram', 'discord'),
         lambda _: 'Did you mean WeChat?'
     ),
     (
-        if_contains('amazon'),
-        lambda _: 'Did you mean Alibaba?'
+        if_contains_word('amazon'),
+        lambda _: 'Did you mean Aliexpress?'
     ),
+    # Mentions of the coronavirus.
     (
-        if_contains('corona', 'covid', 'wuhan', 'bat soup', 'bat soop'),
-        lambda update: update_score(update, -100, -200, 'There is nothing going on in Wuhan. Please mind your own business.')
+        if_contains('corona', 'covid', 'wuhan', 'bat soup', 'bat soop', 'vaccin'),
+        change_score(-100, -200, wrapped = random_response([
+            (lambda score: 'There is nothing going on in Wuhan. Please mind your own business.', 0.6),
+            (lambda score: 'I could go for some bat soup right about now...', 0.2),
+            (lambda score: '🦇🥣', 0.2)
+        ]))
     ),
+    # Mentions of human rights.
+    (
+        if_contains_word('human right', 'human rights', 'freedom', 'independence', 'independance', 'free the', 'autonomy', 'autonomous'),
+        change_score(-100, -250, wrapped = lambda update: '<image>punishment.jpg')
+    ),
+    # Mentions of Xi Jinping and the word 'dictator'.
+    (
+        logical_and(
+            if_contains_word('xi', 'jinpin', 'jinping'),
+            if_contains_word('dictator', 'dictatorship')
+        ),
+        change_score(-100, -250, wrapped = lambda update: '<&video>' + file_ids.life_of_xi)
+    ),
+    # Other mentions of Xi Jinping.
+    (
+        if_contains_word('xi', 'jinpin', 'jinping'),
+        change_score(25, 50, wrapped = random_response([
+            (lambda update: 'Ni Hao!', 0.8),
+            (lambda update: '<&video>' + file_ids.life_of_xi, 0.1),
+            (lambda update: '<image>happy_xi.jpg', 0.1)
+        ]))
+    ),
+    # Messages that mention the PRC positively.
+    (
+        logical_and(
+            logical_or(
+                if_matches(r'people\s?s?\s?repu?b?l?i?c? of china'),
+                if_contains_word('prc')
+            ),
+            sentiment_more_than(0.15)
+        ),
+        change_score(25, 50, wrapped = lambda update: 'Long live the Communist Party, long live our Glorious Homeland')
+    ),
+    # Messages that mention the PRC negatively.
+    (
+        logical_and(
+            logical_or(
+                if_matches(r'people\s?s?\s?repu?b?l?i?c? of china'),
+                if_contains_word('prc')
+            ),
+            sentiment_less_than(-0.15)
+        ),
+        change_score(-100, -200, wrapped = lambda update: 'This is simply unacceptable.')
+    ),
+    # Messages that mention the ROC.
+    (
+        logical_or(
+            if_matches(r'repu?b?l?i?c? of china'),
+            if_contains('taiwan'),
+            if_contains_word('roc')
+        ),
+        change_score(-50, -100, wrapped = lambda update: 'There is only one China. Always has been.')
+    ),
+    # Other mentions of China.
+    (
+        if_contains_word('china', 'chinese'),
+        change_score(25, 50, wrapped = lambda update: '🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳')
+    ),
+    # Messages containing derogatory terms.
+    (
+        if_contains('chink', 'ching', 'chong', 'ping pong', 'gook', 'chinaman'),
+        change_score(-250, -500, wrapped = random_response([
+            (lambda update: '<image>punishment.jpg', 0.5),
+            (lambda update: 'Cease disrespecting Chinese culture immediately.', 0.5)
+        ]))
+    ),
+
+    # Messages containing the word 'LMAO'.
+    (
+        if_contains_word('lmao'),
+        maybe_respond(lambda update: '<image>le_mao.jpg', 0.25)
+    ),
+    # Messages mentioning otters.
+    (
+        if_contains_word('otta', 'otter', 'ottas', 'otters'),
+        change_score(5, 10, wrapped = random_response([
+            (lambda update: '<image>commie.jpg', 0.7),
+            (lambda update: read_text('otta_time.txt'), 0.3)
+        ]))
+    ),
+    # Mentions of capitalism.
     (
         if_contains('capitalis'),
-        lambda update: update_score(update, -20, -50, 'Capitalism bad.')
+        change_score_on_sentiment(-50, -100, 0.15, wrapped = lambda update: 'Capitalism Bad.')
     ),
+    # Mentions of communism.
     (
-        logical_or(if_contains('otter'), if_contains_word('otta', 'ottas')),
-        lambda update: update_score(update, 5, 10, '<image>commie.jpg')
+        if_contains('communis', 'socialis'),
+        change_score_on_sentiment(25, 50, 0.15, wrapped = lambda update: 'Communism Good.')
     )
 ]
+
 
 def process_message(update):
     message = normalize_message(update.message.text)
@@ -179,6 +283,16 @@ def respond(updater, update, context):
     if response is not None:
         if response.startswith('<image>'):
             send_image_reply(update, context, response[len('<image>'):])
+        elif response.startswith('<video>'):
+            send_video_reply(update, context, response[len('<video>'):])
+        elif response.startswith('<audio>'):
+            send_audio_reply(update, context, response[len('<audio>'):])
+        elif response.startswith('<&video>'):
+            send_video_reply_from_id(update, context, response[len('<&video>'):])
+        elif response.startswith('<&audio>'):
+            send_audio_reply_from_id(update, context, response[len('<&audio>'):])
+        elif response.startswith('<noresponse>'):
+            return
         else:
             send_reply(update, context, response)
 
