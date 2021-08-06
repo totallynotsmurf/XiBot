@@ -1,7 +1,6 @@
 import types
 from typing import Union, Callable, List, Tuple
 
-from assets.file_ids import file_ids
 from common import *
 from text_matchers import *
 from reputation import *
@@ -91,8 +90,8 @@ response_map = [
             if_contains('zedong', 'communist party')
         ),
         change_score(25, 50, wrapped = random_response([
-            (lambda update: '<&audio>' + file_ids.red_sun_in_the_sky, 0.50),
-            (lambda update: '<&video>' + file_ids.mao_zedong_cat, 0.50)
+            (lambda update: '<audio>Red Sun in the Sky.mp3', 0.50),
+            (lambda update: '<video>mao_cat.mp4', 0.50)
         ]))
     ),
     # Messages mentioning the Social Credit system.
@@ -182,14 +181,14 @@ response_map = [
             if_contains_word('xi', 'jinpin', 'jinping'),
             if_contains_word('dictator', 'dictatorship')
         ),
-        change_score(-100, -250, wrapped = lambda update: '<&video>' + file_ids.life_of_xi)
+        change_score(-100, -250, wrapped = lambda update: '<video>life_of_xi.mp4')
     ),
     # Other mentions of Xi Jinping.
     (
         if_contains_word('xi', 'jinpin', 'jinping'),
         change_score(25, 50, wrapped = random_response([
             (lambda update: 'Ni Hao!', 0.8),
-            (lambda update: '<&video>' + file_ids.life_of_xi, 0.1),
+            (lambda update: '<video>life_of_xi.mp4', 0.1),
             (lambda update: '<image>happy_xi.jpg', 0.1)
         ]))
     ),
@@ -287,10 +286,6 @@ def respond(updater, update, context):
             send_video_reply(update, context, response[len('<video>'):])
         elif response.startswith('<audio>'):
             send_audio_reply(update, context, response[len('<audio>'):])
-        elif response.startswith('<&video>'):
-            send_video_reply_from_id(update, context, response[len('<&video>'):])
-        elif response.startswith('<&audio>'):
-            send_audio_reply_from_id(update, context, response[len('<&audio>'):])
         elif response.startswith('<noresponse>'):
             return
         else:
