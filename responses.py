@@ -1,3 +1,4 @@
+import numbers
 import types
 from typing import Union, Callable, List, Tuple
 
@@ -11,8 +12,12 @@ import time
 
 
 # Select a random response from a list of responses ((fn, weight) pairs).
-def random_response(responses : List[Tuple[Callable, float]]):
-    return lambda update: random.choices(list(map(nth(0), responses)), list(map(nth(1), responses)))[0](update)
+# Weight may be a float or a callable that accepts the update as its parameter.
+def random_response(responses : List[Tuple[Callable, Union[float, Callable]]]):
+    return lambda update: random.choices(
+        list(map(nth(0), responses)),
+        list(map(lambda w: w if isinstance(w, numbers.Number) else w(update), map(nth(1), responses)))
+    )[0](update)
 
 
 def maybe_respond(response, probability):
@@ -39,6 +44,25 @@ def change_score(a, b, wrapped = None):
         else: return score_changed_message(amount)(update)
 
     return fn
+
+
+# Not really important enough to serialize.
+last_zedong_of_the_day = dict()
+
+
+def may_post_daily_zedong(update):
+    # May trigger at most once per day per chat.
+    id = update.effective_chat.id
+    return not (id in last_zedong_of_the_day and time.time() - last_zedong_of_the_day[id] < (24 * 60 * 60))
+
+
+def zedong_of_the_day(update):
+    if not may_post_daily_zedong(update): return '<noresponse>'
+    last_zedong_of_the_day[update.effective_chat.id] = time.time()
+
+    image_name = random.choice(os.listdir(path.join(asset_folder, 'mao')))
+    return '<captioned=Today\'s Featured Mao Zedong Image>mao/' + image_name
+
 
 
 def change_score_on_sentiment(a, b, threshold, wrapped = None):
@@ -91,7 +115,8 @@ response_map = [
         ),
         change_score(25, 50, wrapped = random_response([
             (lambda update: '<audio>Red Sun in the Sky.mp3', 0.50),
-            (lambda update: '<video>mao_cat.mp4', 0.50)
+            (lambda update: '<video>mao_cat.mp4', 0.50),
+            (zedong_of_the_day, lambda update: 10.0 if may_post_daily_zedong(update) else 0.0)
         ]))
     ),
     # Messages mentioning the Social Credit system.
@@ -259,6 +284,14 @@ response_map = [
     (
         if_contains('communis', 'socialis'),
         change_score_on_sentiment(25, 50, 0.15, wrapped = lambda update: 'Communism Good.')
+    ),
+    # Randomly send images of mao zedong.
+    (
+        lambda _: True,
+        random_response([
+            (lambda update: '<noresponse>', 0.95),
+            (zedong_of_the_day, 0.05)
+        ])
     )
 ]
 
@@ -282,6 +315,11 @@ def respond(updater, update, context):
     if response is not None:
         if response.startswith('<image>'):
             send_image_reply(update, context, response[len('<image>'):])
+        elif response.startswith('<captioned='):
+            caption    = response[len('<captioned=') : response.find('>')]
+            image_name = response[response.find('>') + 1 :]
+
+            send_image_message(updater, update.effective_chat.id, image_name, caption = caption)
         elif response.startswith('<video>'):
             send_video_reply(update, context, response[len('<video>'):])
         elif response.startswith('<audio>'):
