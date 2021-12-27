@@ -1,17 +1,22 @@
 import os
 import subprocess
 
+
 service_name = 'xibot.service'
-install_dir  = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
 
 
 def runcmd(*args):
-    result = subprocess.run([*args], capture_output = True, check = True)
+    result = subprocess.run([*args], capture_output = True)
+
+    if result.returncode != 0:
+        raise RuntimeError(f'Subprocess {" ".join(args)} failed with error code {result.returncode}: {result.stderr}')
+
     return result.stdout.splitlines()
 
 
 def main():
     # Check if updates are available.
+    runcmd('git', 'fetch', 'origin')
     local_version,  = runcmd('git', 'rev-parse', 'HEAD')
     remote_version, = runcmd('git', 'rev-parse', 'origin/master')
 
@@ -27,7 +32,7 @@ def main():
     runcmd('sudo', 'systemctl', 'stop', service_name)
 
     print('Pulling updates from remote...')
-    runcmd('git', 'pull', 'origin/master')
+    runcmd('git', 'pull', 'origin', 'master')
 
     print('Restarting service...')
     runcmd('sudo', 'systemctl', 'start', service_name)

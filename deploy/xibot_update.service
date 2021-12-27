@@ -6,13 +6,13 @@ Requires=multi-user.target
 [Service]
 User=bots_su
 Group=bots
-WorkingDirectory=/home/bots/XiBot/deploy/
+WorkingDirectory=/home/bots/XiBot/
 LimitNOFILE=4096
 ExecStart=/usr/bin/python3 /home/bots/XiBot/deploy/update_from_remote.py
 Restart=always
 RestartSec=600s
-StandardOutput=/home/bots/XiBot/updater_stdout.log
-StandardError=/home/bots/XiBot/updater_stderr.log
+StandardOutput=file:/home/bots/XiBot/updater_stdout.log
+StandardError=file:/home/bots/XiBot/updater_stderr.log
 
 [Install]
 WantedBy=multi-user.target

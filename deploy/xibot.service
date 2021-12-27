@@ -11,8 +11,8 @@ LimitNOFILE=4096
 ExecStart=/usr/bin/python3 /home/bots/XiBot/main.py
 Restart=on-failure
 RestartSec=5s
-StandardOutput=/home/bots/XiBot/xibot_stdout.log
-StandardError=/home/bots/XiBot/xibot_stderr.log
+StandardOutput=file:/home/bots/XiBot/xibot_stdout.log
+StandardError=file:/home/bots/XiBot/xibot_stderr.log
 
 [Install]
 WantedBy=multi-user.target
