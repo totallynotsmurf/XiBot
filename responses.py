@@ -255,7 +255,10 @@ response_map = [
     ),
     # Messages containing derogatory terms.
     (
-        if_contains('chink', 'ching', 'chong', 'ping pong', 'gook', 'chinaman'),
+        logical_or(
+            if_contains_word('chink', 'ching', 'chong'),
+            if_contains('chingchang', 'chingchong', 'changchong', 'ping pong', 'gook', 'chinaman')
+        ),
         change_score(-250, -500, wrapped = random_response([
             (lambda update: '<image>punishment.jpg', 0.5),
             (lambda update: 'Cease disrespecting Chinese culture immediately.', 0.5)
