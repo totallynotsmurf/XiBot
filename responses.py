@@ -331,4 +331,3 @@ def respond(updater, update, context):
             return
         else:
             send_reply(update, context, response)
-
