@@ -32,7 +32,8 @@ def main():
     runcmd('sudo', 'systemctl', 'stop', service_name)
 
     print('Pulling updates from remote...')
-    runcmd('git', 'pull', 'origin', 'master')
+    runcmd('git', 'reset', '--hard', 'origin/master')
+    runcmd('sudo', 'chmod', 'g+rwx', './')
 
     print('Restarting service...')
     runcmd('sudo', 'systemctl', 'start', service_name)
