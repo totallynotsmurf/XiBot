@@ -9,7 +9,7 @@ from threading import Lock
 from common import send_image_message
 from responses import normalize_message
 
-address = ('localhost', 420)
+address = ('localhost', 1420)
 
 class revbot_listener:
     def __init__(self, updater):
