@@ -1,0 +1,18 @@
+[Unit]
+Description=Xi Jinping Bot
+After=multi-user.target network-online.target
+Requires=multi-user.target
+
+[Service]
+User=bots
+Group=bots
+WorkingDirectory=/home/bots/XiBot/
+LimitNOFILE=4096
+ExecStart=/usr/bin/python3 /home/bots/XiBot/main.py
+Restart=on-failure
+RestartSec=5s
+StandardOutput=/home/bots/XiBot/xibot_stdout.log
+StandardError=/home/bots/XiBot/xibot_stderr.log
+
+[Install]
+WantedBy=multi-user.target
