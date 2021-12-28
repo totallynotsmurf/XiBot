@@ -1,4 +1,5 @@
 import collections
+from pathlib import Path
 
 from common import *
 
@@ -109,6 +110,7 @@ def reset_reputation(update):
 def load_reputations():
     global reputation
 
+    Path(os.path.join(asset_folder, 'reputation.json')).touch(exists_ok = True)
     with open(os.path.join(asset_folder, 'reputation.json'), 'r') as handle:
         reputation = collections.OrderedDict(map(
             lambda kv: (str(kv[0]), float(kv[1])),
