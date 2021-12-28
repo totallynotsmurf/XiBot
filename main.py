@@ -1,3 +1,5 @@
+import subprocess
+
 from telegram.ext import Updater, MessageHandler, Filters
 
 from responses import *
@@ -26,6 +28,11 @@ def command_reset_reputation(update, context):
     reset_reputation(update)
 
 
+def command_show_version(update, context):
+    result = subprocess.run(['git', 'rev-parse', 'HEAD'], capture_output = True)
+    send_reply(update, context, f'Currently deployed XiBot version: {result.stdout.decode("utf-8")}')
+
+
 def bind_updater(fn): return lambda u, c: fn(updater, u, c)
 def bind_args(fn): return lambda u, c: fn(updater, (u.effective_chat.id, c.bot.getChat(u.effective_chat.id).title))
 
@@ -35,6 +42,8 @@ dispatcher.add_handler(MessageHandler(Filters.all & (~Filters.command), bind_upd
 
 add_command(dispatcher, command_show_reputation,  'show_score')
 add_command(dispatcher, command_reset_reputation, 'reset_score')
+add_command(dispatcher, command_show_version, 'version')
+
 load_reputations()
 
 updater.start_polling()
