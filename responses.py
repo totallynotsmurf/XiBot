@@ -64,6 +64,16 @@ def zedong_of_the_day(update):
     return '<captioned=Today\'s Featured Mao Zedong Image>mao/' + image_name
 
 
+def social_credit_notice(update):
+    credit_score = get_reputation(update)
+    if credit_score >= 0: return
+
+    copypasta = read_text('internet_activity.txt') \
+        .replace('${CRED}', str(credit_score)) \
+        .replace('${CRED_ABS}', str(abs(credit_score)))
+
+    return copypasta
+
 
 def change_score_on_sentiment(a, b, threshold, wrapped = None):
     def fn(update):
@@ -292,8 +302,9 @@ response_map = [
     (
         lambda _: True,
         random_response([
-            (lambda update: '<noresponse>', 0.95),
-            (zedong_of_the_day, 0.05)
+            (lambda update: '<noresponse>', 0.9475),
+            (zedong_of_the_day, 0.05),
+            (social_credit_notice, 0.0025)
         ])
     )
 ]

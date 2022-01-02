@@ -110,8 +110,13 @@ def reset_reputation(update):
 def load_reputations():
     global reputation
 
-    Path(os.path.join(asset_folder, 'reputation.json')).touch(exist_ok = True)
-    with open(os.path.join(asset_folder, 'reputation.json'), 'r') as handle:
+    json_path = os.path.join(asset_folder, 'reputation.json')
+
+    if not os.path.exists(json_path):
+        with open(json_path, 'w') as handle:
+            handle.write('{}')
+
+    with open(json_path, 'r') as handle:
         reputation = collections.OrderedDict(map(
             lambda kv: (str(kv[0]), float(kv[1])),
             json.load(handle).items()
