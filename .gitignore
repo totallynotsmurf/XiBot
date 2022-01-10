@@ -1,6 +1,8 @@
 assets/token.txt
 assets/reputation.json
+assets/user_ids.json
 assets/file_ids.json
+
 venv/
 __pycache__/
 .idea/
