@@ -1,10 +1,16 @@
-import collections
 from pathlib import Path
+from typing import List
+
+import telegram
 
 from common import *
+from userid_map import *
 
 import json
 import os
+import collections
+import string
+import random
 
 
 reputation = dict()
@@ -63,6 +69,35 @@ reputation_messages = collections.OrderedDict({
         lambda user: f'{user} has re-appeared with renewed respect for the Glorious Chinese Communist Party.'
     ]
 })
+
+
+# Gets a list of count users (or less if not enough users exist) with negative social credit in the current server, excluding the sender.
+def get_criminal_users(count: int, update):
+    kv_pairs = list(reputation.items())
+    random.shuffle(kv_pairs)
+
+    result = list()
+    for username, score in kv_pairs:
+        # Skip users without usernames.
+        if username == 'null': continue
+
+        # Skip the sender of the message.
+        if update.message.from_user.username == username: continue
+
+        # Skip users not in the server.
+        try:
+            member = update.message.chat.get_member(get_id(username))
+            if not member.status.upper() in ['CREATOR', 'ADMINISTRATOR', 'MEMBER']: continue
+        except: continue
+
+        # Skip users with positive social credit.
+        if score < 0:
+            result.append(member.user.full_name)
+
+        if len(result) >= count: break
+
+    return result
+
 
 
 def get_reputation(update):

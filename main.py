@@ -6,6 +6,7 @@ from responses import *
 from revbot_notifier import *
 from reputation import *
 from common import *
+from userid_map import *
 
 import os.path as path
 
@@ -39,11 +40,13 @@ def bind_args(fn): return lambda u, c: fn(updater, (u.effective_chat.id, c.bot.g
 dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_title, bind_args(on_server_name_changed)))
 dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, lambda u, c: send_reply(u, c, 'Ni Hao!')))
 dispatcher.add_handler(MessageHandler(Filters.all & (~Filters.command), bind_updater(respond)))
+dispatcher.add_handler(MessageHandler(Filters.all, lambda u, c: set_id(u)), group = 1)
 
 add_command(dispatcher, command_show_reputation,  'show_score')
 add_command(dispatcher, command_reset_reputation, 'reset_score')
 add_command(dispatcher, command_show_version, 'version')
 
 load_reputations()
+load_ids()
 
 updater.start_polling()

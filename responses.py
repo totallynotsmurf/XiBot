@@ -66,13 +66,33 @@ def zedong_of_the_day(update):
 
 def social_credit_notice(update):
     credit_score = get_reputation(update)
-    if credit_score >= 0: return
+    if credit_score >= 0: return '<noresponse>'
 
     copypasta = read_text('internet_activity.txt') \
         .replace('${CRED}', str(credit_score)) \
         .replace('${CRED_ABS}', str(abs(credit_score)))
 
     return copypasta
+
+
+def bing_chilling_notice(update):
+    credit_score = get_reputation(update)
+    criminals    = get_criminal_users(random.randint(1, 4), update)
+
+    criminal_string = ', '.join(criminals)
+    if len(criminal_string) > 0: criminal_string = f'({criminal_string})'
+
+    def replace_last(txt, substr, replacement):
+        for i in reversed(range(len(txt) - len(substr) + 1)):
+            if txt[i:i+len(substr)] == substr:
+                return ''.join([txt[:i], replacement, txt[i+len(substr):]])
+
+        return txt
+
+    return read_text('bing_chilling_notice.txt') \
+        .replace('${CRED}', str(credit_score)) \
+        .replace('${CRIMINAL_LIST_EN}', replace_last(criminal_string, ', ', ' & ')) \
+        .replace('${CRIMINAL_LIST_CN}', replace_last(criminal_string, ', ', ' 和 '))
 
 
 def change_score_on_sentiment(a, b, threshold, wrapped = None):
@@ -131,8 +151,21 @@ response_map = [
     ),
     # Messages mentioning the Social Credit system.
     (
-        if_contains_word('credit', 'social score'),
-        change_score(-10, -25, wrapped = lambda update: '<image>social_credit.jpg')
+        if_contains_word('credit', 'social score', 'good citizen'),
+        change_score(-25, +25, wrapped = random_response([
+            (lambda update: '<image>social_credit.jpg', 0.5),
+            (lambda update: '<video>Good Citizen Test.mp4', 0.5)
+        ]))
+    ),
+    # Messages mentioning ice cream.
+    (
+        if_contains_word('bing chilling', 'ice cream'),
+        random_response([
+            (lambda update: bing_chilling_notice(update), lambda update: 0.0 if get_reputation(update) >= 0 else 1e12),
+            (lambda update: '<video>Bing Chilling.mp4', 0.50),
+            (lambda update: '<video>Good Citizen Test.mp4', 0.25),
+            (lambda update: read_text(f'bing_chilling_{random.randint(1, 3)}.txt'), 0.25),
+        ])
     ),
     # Messages mentioning Winnie the Pooh.
     (
@@ -214,7 +247,7 @@ response_map = [
     (
         logical_and(
             if_contains_word('xi', 'jinpin', 'jinping'),
-            if_contains_word('dictator', 'dictatorship')
+            if_contains_word('dictator', 'dictatorship', 'supreme leader', 'great leader')
         ),
         change_score(-100, -250, wrapped = lambda update: '<video>life_of_xi.mp4')
     ),
@@ -298,13 +331,13 @@ response_map = [
         if_contains('communis', 'socialis'),
         change_score_on_sentiment(25, 50, 0.15, wrapped = lambda update: 'Communism Good.')
     ),
-    # Randomly send images of mao zedong.
+    # Randomly send images of mao zedong and the social credit notice.
     (
         lambda _: True,
         random_response([
             (lambda update: '<noresponse>', 0.9475),
             (zedong_of_the_day, 0.05),
-            (social_credit_notice, 0.0025)
+            (social_credit_notice, 0.005)
         ])
     )
 ]
