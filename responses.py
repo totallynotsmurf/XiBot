@@ -159,12 +159,12 @@ response_map = [
     ),
     # Messages mentioning ice cream.
     (
-        if_contains_word('bing chilling', 'ice cream'),
+        if_contains_word('bing chilling', 'ice cream', 'bingchilling'),
         random_response([
             (lambda update: bing_chilling_notice(update), lambda update: 0.0 if get_reputation(update) >= 0 else 1e12),
-            (lambda update: '<video>Bing Chilling.mp4', 0.50),
+            (lambda update: '<video>Bing Chilling.mp4', 0.25),
             (lambda update: '<video>Good Citizen Test.mp4', 0.25),
-            (lambda update: read_text(f'bing_chilling_{random.randint(1, 3)}.txt'), 0.25),
+            (lambda update: read_text(f'bing_chilling_{random.randint(1, 3)}.txt'), 0.33),
         ])
     ),
     # Messages mentioning Winnie the Pooh.
