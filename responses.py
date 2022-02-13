@@ -137,6 +137,15 @@ response_map = [
         if_matches(r'taiwan numb[a|e]r? [(one)|1]'),
         change_score(-250, -500, wrapped = lambda update: 'This is by far the most disgusting thing I\'ve read all day.')
     ),
+    # Messages that mention John Xina
+    (
+        if_matches('[john|jiang|zhong] [xina|china|cena|cina]'),
+        random_response([
+            (lambda update: '<video>zedongwave.mp4', 0.33),
+            (lambda update: '<video>Bing Chilling.mp4', 0.33),
+            (lambda update: '<video>Good Citizen Test.mp4', 0.33)
+        ])
+    ),
     # Messages that mention Mao Zedong or the CCP.
     (
         logical_or(
@@ -145,6 +154,7 @@ response_map = [
         ),
         change_score(25, 50, wrapped = random_response([
             (lambda update: '<audio>Red Sun in the Sky.mp3', 0.50),
+            (lambda update: '<video>zedongwave.mp4', 0.50),
             (lambda update: '<video>mao_cat.mp4', 0.50),
             (zedong_of_the_day, lambda update: 10.0 if may_post_daily_zedong(update) else 0.0)
         ]))
@@ -183,17 +193,19 @@ response_map = [
             if_contains_word('xinjiang', 'xinjang')
         ),
         change_score(-100, -250, wrapped = random_response([
-            (lambda update: 'There is no war in B̶a̶ ̶S̶i̶n̶g̶ ̶S̶e̶ The Xinjiang Autonomous Area.', 0.7),
-            (lambda update: '<image>punishment.jpg', 0.3)
+            (lambda update: 'There is no war in B̶a̶ ̶S̶i̶n̶g̶ ̶S̶e̶ The Xinjiang Autonomous Area.', 0.65),
+            (lambda update: '<image>punishment.jpg', 0.25),
+            (lambda update: '<video>stfu.mp4', 0.10)
         ]))
     ),
     # Mentions of Tibet or Hong Kong.
     (
         if_contains_word('tibet', 'dalai', 'hongkong', 'hong kong'),
         change_score(-100, -250, wrapped = random_response([
-            (lambda update: 'Rightful Chinese clay.', 0.7),
-            (lambda update: 'Choose your next words very carefully, capitalist scum...', 0.3),
-            (lambda update: '<image>punishment.jpg', 0.3)
+            (lambda update: 'Rightful Chinese clay.', 0.5),
+            (lambda update: 'Choose your next words very carefully, capitalist scum...', 0.2),
+            (lambda update: '<image>punishment.jpg', 0.2),
+            (lambda update: '<video>stfu.mp4', 0.1)
         ]))
     ),
     # Mentions of Tiananmen Square.
@@ -203,8 +215,9 @@ response_map = [
             if_contains_word('1989', 'student protest', 'student protests')
         ),
         change_score(-250, -500, wrapped = random_response([
-            (lambda update: 'I don\'t know what you\'re talking about.', 0.7),
-            (lambda update: '<image>punishment.jpg', 0.3)
+            (lambda update: 'I don\'t know what you\'re talking about.', 0.65),
+            (lambda update: '<image>punishment.jpg', 0.25),
+            (lambda update: '<video>stfu.mp4', 0.1)
         ]))
     ),
     # Mentions of common electronic brands.
@@ -330,6 +343,28 @@ response_map = [
     (
         if_contains('communis', 'socialis'),
         change_score_on_sentiment(25, 50, 0.15, wrapped = lambda update: 'Communism Good.')
+    ),
+    # Messages including the text "shut up"
+    (
+        if_contains_word('shut it', 'shut up', 'stfu', 'shut the fuck up'),
+        lambda update: '<video>stfu.mp4'
+    ),
+    # Messages mentioning gaming.
+    (
+        if_contains_word('game', 'gaming', 'gamer'),
+        lambda update: '<video>gaming.mp4'
+    ),
+    # Messages mentioning history or Japan.
+    (
+        if_contains_word('history', 'historical', 'ming', 'qing', 'anime', 'japan'),
+        random_response([
+            (lambda update: '<noresponse>', 0.75),
+            (lambda update: '<video>historical.mp4', 0.25)
+        ])
+    ),
+    (
+        if_contains_word('friend', 'friends'),
+        lambda update: '<video>friends.mp4'
     ),
     # Randomly send images of mao zedong and the social credit notice.
     (
