@@ -139,7 +139,7 @@ response_map = [
     ),
     # Messages that mention John Xina
     (
-        if_matches('[john|jiang|zhong] [xina|china|cena|cina]'),
+        if_matches('((john)|(jiang)|(zhong)) ((xina)|(china)|(cena)|(cina))'),
         random_response([
             (lambda update: '<video>zedongwave.mp4', 0.33),
             (lambda update: '<video>Bing Chilling.mp4', 0.33),
