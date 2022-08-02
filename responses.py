@@ -370,9 +370,9 @@ response_map = [
     (
         lambda _: True,
         random_response([
-            (lambda update: '<noresponse>', 0.9475),
+            (lambda update: '<noresponse>', 0.949),
             (zedong_of_the_day, 0.05),
-            (social_credit_notice, 0.005)
+            (social_credit_notice, 0.001)
         ])
     )
 ]
