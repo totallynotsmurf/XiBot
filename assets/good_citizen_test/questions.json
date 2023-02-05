@@ -1,0 +1,97 @@
+[
+    {
+        "question": "Who is the General Secretary of the Chinese Communist Party?",
+        "answers": [
+            "A: Xi Jinping",
+            "B: Mao Zedong",
+            "C: Deng Xiaoping"
+        ],
+        "correct_answer": "A"
+    },
+    {
+        "question": "What is happening in this picture?",
+        "image": "tiananmen_square.jpg",
+        "answers": [
+            "A: The Tiananmen Square massacre of 1989",
+            "B: Fake made up American nonsense movie"
+        ],
+        "correct_answer": "B"
+    },
+    {
+        "question": "What is happening in the Xinjiang Uyghur Autonomous Region?",
+        "answers": [
+            "A: Genocide of the Uyghur people.",
+            "B: Free education for all at the CCP re-education center, so kindly provided by our benefactors.",
+            "C: Coronavirus Weapon Development Tests"
+        ],
+        "correct_answer": "B"
+    },
+    {
+        "question": "What was the purpose of our glorious balloon that drifted so unfortunately over the USA?",
+        "answers": [
+            "A: Spy on the American Nuclear Missile Program",
+            "B: Delivery vehicle for a new deadly strain of the Wuhan Flu",
+            "C: Innocent weather balloon, so sowwy it drifted off-course uwu"
+        ],
+        "correct_answer": "C"
+    },
+    {
+        "question": "Which one of these movie posters is acceptable?",
+        "image": "black_panther.jpg",
+        "answers": [
+            "A: The one without the bad man",
+            "B: The right one?"
+        ],
+        "correct_answer": "A"
+    },
+    {
+        "question": "Which of these lines indicates the correct maritime borders within the South China Sea?",
+        "image": "south_china_sea.png",
+        "answers": [
+            "A: As defined by the United Nations Convention of the Law of the Sea",
+            "B: It is a complicated issue without a right answer",
+            "C: The glorious nine-dash line marks the area capitalist pigs should stay out of",
+            "D: A compromise should be reached to satisfy the concerns of all parties involved"
+        ],
+        "correct_answer": "C"
+    },
+    {
+        "question": "How many China's are there?",
+        "answers": [
+            "A: There is the People's Republic of China (PRC) and the Republic of China (ROC)",
+            "B: The PRC is the one true China, anything else is American propaganda",
+            "C: Taiwan numba one!"
+        ],
+        "correct_answer": "B"
+    },
+    {
+        "question": "What are these nets for?",
+        "image": "suicide_net.png",
+        "answers": [
+            "A: To catch people that jump to death",
+            "B: Happy bouncy fun time for good workers",
+            "C: 5G Coronavirus Amplifiers"
+        ],
+        "correct_answer": "B"
+    },
+    {
+        "question": "What kind of oil is traditionally used by Chinese street vendors?",
+        "image": "gutter_oil.png",
+        "answers": [
+            "A: Only the most high quality oils and fats. Completely safe thanks to the tireless work of the Chinese Health Inspection Service",
+            "B: Recycled Sewage (\"Gutter Oil\")",
+            "C: A little bit of both"
+        ],
+        "correct_answer": "A"
+    },
+    {
+        "question": "Find Xi Jinping",
+        "image": "xi.png",
+        "answers": [
+            "A: Over there on the left",
+            "B: On the bottom right",
+            "C: This is an illegal meme in China"
+        ],
+        "correct_answer": "C"
+    }
+]
