@@ -75,6 +75,13 @@ def social_credit_notice(update):
     return copypasta
 
 
+def malice_notice(update):
+    credit_score = get_reputation(update)
+    if credit_score < 25000: return '<noresponse>'
+
+    return read_text('malice_notice.txt').replace('${CRED}', str(int(credit_score)))
+
+
 def bing_chilling_notice(update):
     credit_score = get_reputation(update)
     criminals    = get_criminal_users(random.randint(1, 4), update)
@@ -153,18 +160,22 @@ response_map = [
             if_contains('zedong', 'communist party')
         ),
         change_score(25, 50, wrapped = random_response([
-            (lambda update: '<audio>Red Sun in the Sky.mp3', 0.50),
-            (lambda update: '<video>zedongwave.mp4', 0.50),
-            (lambda update: '<video>mao_cat.mp4', 0.50),
-            (zedong_of_the_day, lambda update: 10.0 if may_post_daily_zedong(update) else 0.0)
+            (lambda update: '<audio>Red Sun in the Sky.mp3', 1),
+            (lambda update: '<video>zedongwave.mp4', 1),
+            (lambda update: '<video>mao_cat.mp4', 1),
+            (lambda update: '<audio>Red Chiptune in the Sky.mp3', 1),
+            (lambda update: '<audio>延边人民热爱毛主席.mp3', 1),
+            (lambda update: '<audio>延边人民热爱毛主席-wave.mp3', 1),
+            (zedong_of_the_day, lambda update: 100.0 if may_post_daily_zedong(update) else 0.0)
         ]))
     ),
     # Messages mentioning the Social Credit system.
     (
-        if_contains_word('credit', 'social score', 'good citizen'),
+        if_contains_word('credit', 'social score'),
         change_score(-25, +25, wrapped = random_response([
-            (lambda update: '<image>social_credit.jpg', 0.5),
-            (lambda update: '<video>Good Citizen Test.mp4', 0.5)
+            (lambda update: '<image>social_credit.jpg', 0.33),
+            (lambda update: '<video>Good Citizen Test.mp4', 0.33),
+            (lambda update: '<audio>Social Credit Deducted.mp3', 0.33)
         ]))
     ),
     # Messages mentioning ice cream.
@@ -182,8 +193,9 @@ response_map = [
         if_contains_word('pooh', 'poohbear', 'winnie'),
         change_score(-100, -250, wrapped = random_response([
             (lambda update: '<image>punishment.jpg', 0.6),
-            (lambda update: '<image>dinnertime.jpg', 0.3),
-            (lambda update: 'Choose your next words very carefully, capitalist scum...', 0.3)
+            (lambda update: '<image>dinnertime.jpg', 0.25),
+            (lambda update: 'Choose your next words very carefully, capitalist scum...', 0.25),
+            (lambda update: '<video>india.mp4', 0.1)
         ]))
     ),
     # Mentions of the Uyghurs.
@@ -218,6 +230,30 @@ response_map = [
             (lambda update: 'I don\'t know what you\'re talking about.', 0.65),
             (lambda update: '<image>punishment.jpg', 0.25),
             (lambda update: '<video>stfu.mp4', 0.1)
+        ]))
+    ),
+    # Mentions of balloons or spying
+    (
+        logical_or(
+            if_contains_word('bloon', 'bloons'),
+            if_contains('spy', 'baloon', 'balloon')
+        ),
+        random_response([
+            (lambda update: '<video>balloon/' + random.choice(['minuteman.mp4', 'rural.mp4', 'pos.mp4']), 0.5),
+            (lambda update: '<image>balloon/' + random.choice(['bloons.jpg', 'goodnight.jpg', 'norad.jpg', 'redneck.jpg']), 0.5)
+        ])
+    ),
+    # Good night messages
+    (
+        if_contains_word('goodnight', 'good night', 'sleep', 'gn'),
+        lambda update: '<image>balloon/goodnight.jpg'
+    ),
+    # Mentions of India.
+    (
+        if_contains_word('india'),
+        change_score(-50, -100, wrapped = random_response([
+            (lambda update: 'Shithole country! China numba one! 🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳', 0.50),
+            (lambda update: '<video>india.mp4', 0.50)
         ]))
     ),
     # Mentions of common electronic brands.
@@ -359,20 +395,22 @@ response_map = [
         if_contains_word('history', 'historical', 'ming', 'qing', 'anime', 'japan'),
         random_response([
             (lambda update: '<noresponse>', 0.75),
-            (lambda update: '<video>historical.mp4', 0.25)
+            (lambda update: '<video>historical.mp4', 0.125),
+            (lambda update: '<video>historical_2.mp4', 0.125)
         ])
     ),
     (
         if_contains_word('friend', 'friends'),
         lambda update: '<video>friends.mp4'
     ),
-    # Randomly send images of mao zedong and the social credit notice.
+    # Randomly send images of mao zedong and the social credit/malice notices.
     (
         lambda _: True,
         random_response([
-            (lambda update: '<noresponse>', 0.949),
+            (lambda update: '<noresponse>', 1),
             (zedong_of_the_day, 0.05),
-            (social_credit_notice, 0.001)
+            (social_credit_notice, 0.001),
+            (malice_notice, 0.001)
         ])
     )
 ]

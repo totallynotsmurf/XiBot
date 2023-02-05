@@ -13,6 +13,12 @@ file_id_manager = file_manager(asset_folder)
 def nth(n): return lambda arr: arr[n]
 
 
+def display_user(user):
+    if user.first_name is not None: return user.first_name
+    if user.username is not None: return user.username
+    return "user"
+
+
 def read_text(filename):
     with open(path.join(asset_folder, filename), 'r', encoding = 'utf-8') as handle:
         return ''.join(handle.readlines()).replace('\r\n', '\n')
@@ -34,6 +40,11 @@ def send_image_reply(update, context, image_name):
 def send_image_message(updater, chat_id, image_name, caption = None):
     with open(path.join(asset_folder, image_name), 'rb') as image_file:
         updater.bot.send_photo(chat_id, image_file, caption = caption)
+
+
+def send_image_message_with_context(update, context, image_name, caption = None):
+    with open(path.join(asset_folder, image_name), 'rb') as image_file:
+        context.bot.send_photo(update.effective_chat.id, image_file, caption = caption)
 
 
 def send_reply_cached(update, context, file_name, send_fn, get_id_fn):
