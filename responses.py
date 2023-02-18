@@ -153,6 +153,11 @@ response_map = [
             (lambda update: '<video>Good Citizen Test.mp4', 0.33)
         ])
     ),
+    # Messages that mention Lenin, Stalin or the Soviet Union.
+    (
+        if_contains_word('lenin', 'stalin', 'soviet'),
+        lambda update: '<video>stalin.mp4'
+    ),
     # Messages that mention Mao Zedong or the CCP.
     (
         logical_or(
@@ -166,6 +171,8 @@ response_map = [
             (lambda update: '<audio>Red Chiptune in the Sky.mp3', 1),
             (lambda update: '<audio>延边人民热爱毛主席.mp3', 1),
             (lambda update: '<audio>延边人民热爱毛主席-wave.mp3', 1),
+            (lambda update: '<audio>The Second Paragraph of Pyrocynical.mp3', 1),
+            (lambda update: '<audio>秋冬之美第二段 王建民.mp3', 1),
             (zedong_of_the_day, lambda update: 100.0 if may_post_daily_zedong(update) else 0.0)
         ]))
     ),
@@ -343,7 +350,11 @@ response_map = [
     # Other mentions of China.
     (
         if_contains_word('china', 'chinese'),
-        change_score(25, 50, wrapped = lambda update: '🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳')
+        change_score(25, 50, wrapped = random_response([
+            (lambda update: '🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳', 0.5),
+            (lambda update: '<audio>The Second Paragraph of Pyrocynical.mp3', 0.25),
+            (lambda update: '<audio>秋冬之美第二段 王建民.mp3', 0.25)
+        ]))
     ),
     # Messages containing derogatory terms.
     (
@@ -378,7 +389,10 @@ response_map = [
     # Mentions of communism.
     (
         if_contains('communis', 'socialis'),
-        change_score_on_sentiment(25, 50, 0.15, wrapped = lambda update: 'Communism Good.')
+        change_score_on_sentiment(25, 50, 0.15, wrapped = random_response([
+            (lambda update: 'Communism Good.', 0.75),
+            (lambda update: '<video>stalin.mp4', 0.25)
+        ]))
     ),
     # Messages including the text "shut up"
     (
@@ -410,7 +424,7 @@ response_map = [
             (lambda update: '<noresponse>', 1),
             (zedong_of_the_day, 0.05),
             (social_credit_notice, 0.001),
-            (malice_notice, 0.001)
+            (malice_notice, 0.0025)
         ])
     )
 ]
