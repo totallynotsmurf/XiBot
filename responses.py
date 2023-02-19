@@ -79,6 +79,7 @@ def malice_notice(update):
     credit_score = get_reputation(update)
     if credit_score < 25000: return '<noresponse>'
 
+    set_reputation(-10000, update)
     return read_text('malice_notice.txt').replace('${CRED}', str(int(credit_score)))
 
 

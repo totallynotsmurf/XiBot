@@ -108,6 +108,10 @@ def get_reputation(update):
 
 
 def update_reputation(delta, update):
+    set_reputation(get_reputation(update) + delta, update)
+
+
+def set_reputation(new_value, update):
     global reputation, reputation_messages
 
     display_name = update.message.from_user.full_name
@@ -116,7 +120,8 @@ def update_reputation(delta, update):
     if username not in reputation: reputation[username] = 0.0
 
     old_reputation = reputation[username]
-    reputation[username] += delta
+    delta          = new_value - old_reputation
+    reputation[username] = new_value
 
     reply = []
     for value, actions in reputation_messages.items():
