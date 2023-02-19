@@ -173,6 +173,7 @@ response_map = [
             (lambda update: '<audio>延边人民热爱毛主席-wave.mp3', 1),
             (lambda update: '<audio>The Second Paragraph of Pyrocynical.mp3', 1),
             (lambda update: '<audio>秋冬之美第二段 王建民.mp3', 1),
+            (lambda update: '<video>patriot.mp4', 1),
             (zedong_of_the_day, lambda update: 100.0 if may_post_daily_zedong(update) else 0.0)
         ]))
     ),
@@ -180,9 +181,10 @@ response_map = [
     (
         if_contains_word('credit', 'social score'),
         change_score(-25, +25, wrapped = random_response([
-            (lambda update: '<image>social_credit.jpg', 0.33),
-            (lambda update: '<video>Good Citizen Test.mp4', 0.33),
-            (lambda update: '<audio>Social Credit Deducted.mp3', 0.33)
+            (lambda update: '<image>social_credit.jpg', 0.25),
+            (lambda update: '<video>Good Citizen Test.mp4', 0.25),
+            (lambda update: '<audio>Social Credit Deducted.mp3', 0.25),
+            (lambda update: '<video>patriot.mp4', 0.25)
         ]))
     ),
     # Messages mentioning ice cream.
@@ -352,8 +354,9 @@ response_map = [
         if_contains_word('china', 'chinese'),
         change_score(25, 50, wrapped = random_response([
             (lambda update: '🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳', 0.5),
-            (lambda update: '<audio>The Second Paragraph of Pyrocynical.mp3', 0.25),
-            (lambda update: '<audio>秋冬之美第二段 王建民.mp3', 0.25)
+            (lambda update: '<audio>The Second Paragraph of Pyrocynical.mp3', 0.2),
+            (lambda update: '<audio>秋冬之美第二段 王建民.mp3', 0.2),
+            (lambda update: '<video>patriot.mp4', 0.1)
         ]))
     ),
     # Messages containing derogatory terms.
