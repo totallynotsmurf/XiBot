@@ -249,7 +249,7 @@ response_map = [
             if_contains('spy', 'baloon', 'balloon')
         ),
         random_response([
-            (lambda update: '<video>balloon/' + random.choice(['minuteman.mp4', 'rural.mp4', 'pos.mp4']), 0.5),
+            (lambda update: '<video>balloon/' + random.choice(['minuteman.mp4', 'rural.mp4', 'pos.mp4', 'biden.mp4']), 0.5),
             (lambda update: '<image>balloon/' + random.choice(['bloons.jpg', 'goodnight.jpg', 'norad.jpg', 'redneck.jpg']), 0.5)
         ])
     ),
@@ -257,6 +257,11 @@ response_map = [
     (
         if_contains_word('goodnight', 'good night', 'sleep', 'gn'),
         lambda update: '<image>balloon/goodnight.jpg'
+    ),
+    # Mentions of Joe Biden.
+    (
+        if_contains_word('biden'),
+        lambda update: '<video>balloon/biden.mp4'
     ),
     # Mentions of India.
     (
