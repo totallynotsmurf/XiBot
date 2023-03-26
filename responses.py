@@ -260,7 +260,7 @@ response_map = [
     ),
     # Mentions of Joe Biden.
     (
-        if_contains_word('biden'),
+        if_contains_word('biden', 'sleepy joe'),
         lambda update: '<video>balloon/biden.mp4'
     ),
     # Mentions of India.
@@ -380,7 +380,7 @@ response_map = [
     # Messages containing the word 'LMAO'.
     (
         if_contains_word('lmao'),
-        maybe_respond(lambda update: '<image>le_mao.jpg', 0.25)
+        maybe_respond(lambda update: '<image>le_mao.jpg', 0.1)
     ),
     # Messages mentioning otters.
     (

@@ -2,6 +2,7 @@ import json
 import os
 import random
 import re
+import time
 from enum import Enum
 from time import sleep
 
@@ -157,6 +158,7 @@ def handle_test_passed(update, context):
 
     ConversationState.close_conversation(update.message.from_user.id)
     update_reputation(+500, update)
+    on_gct_completed(update)
 
 
 def handle_test_failed(update, context):
@@ -169,18 +171,31 @@ def handle_test_failed(update, context):
 
     ConversationState.close_conversation(update.message.from_user.id)
     update_reputation(-1000, update)
+    on_gct_completed(update)
+
+
+def handle_conversation_start(update, context):
+    may_start, reason = may_start_gct(update)
+
+    if not may_start:
+        update.message.reply_text(reason)
+        return ConversationHandler.END
+    else:
+        on_gct_started(update)
+
+        update.message.reply_text(read_text('good_citizen_test/prelude.txt')),
+        sleep(30),
+
+        print_current_question(update, context),
+        return QuestionProgressState.SHOWED_QUESTION
+
 
 
 def make_handler():
     return ConversationHandler(
         entry_points = [MessageHandler(
             Filters.regex(re.compile(r'good citizen', re.IGNORECASE)),
-            lambda u, c: (
-                u.message.reply_text(read_text('good_citizen_test/prelude.txt')),
-                sleep(30),
-                print_current_question(u, c),
-                QuestionProgressState.SHOWED_QUESTION
-            )[-1]
+            handle_conversation_start
         )],
         fallbacks = [CommandHandler(
             'cancel',
@@ -188,6 +203,7 @@ def make_handler():
                 ConversationState.close_conversation(u.message.from_user.id),
                 u.message.reply_text('The test has been cancelled. For not completing the Good Citizen Test, you will be deducted 100 Social Credit.'),
                 update_reputation(-100, u),
+                on_gct_completed(u),
                 ConversationHandler.END
             )[-1]
         )],
@@ -196,10 +212,41 @@ def make_handler():
                 Filters.text & ~Filters.command,
                 handle_question_answer
             )]
-            #ConversationHandler.TIMEOUT: [ MessageHandler(
-            #    Filters.all,
-            #    lambda u, c: handle_wrong_answer(u, c, ['You ran out of time you idiot...'])
-            #)]
         },
         run_async = True
     )
+
+
+class GCT_SERVER_STATE(Enum):
+    IN_PROGRESS = 0
+    DONE        = 1
+
+# Not really important enough to serialize.
+# Format: Server ID => (Username, Timestamp, State)
+last_gct_for_server = dict()
+
+
+# Returns (bool, reason).
+def may_start_gct(update):
+    # May trigger at most once per day per chat.
+    id = update.effective_chat.id
+
+    if id not in last_gct_for_server:
+        return True, None
+    else:
+        user, timestamp, state = last_gct_for_server[id]
+
+        if state == GCT_SERVER_STATE.IN_PROGRESS:
+            return False, f"I am kinda busy with {user} at the moment..."
+
+        if time.time() - timestamp < (24 * 60 * 60):
+            return False, "The CCP Social Credit System is still processing the results of the previous Good Citizen Test that took place in this server. Please try again later."
+
+        return True, None
+
+
+def on_gct_started(update):
+    last_gct_for_server[update.effective_chat.id] = (update.message.from_user.full_name, time.time(), GCT_SERVER_STATE.IN_PROGRESS)
+
+def on_gct_completed(update):
+    last_gct_for_server[update.effective_chat.id] = (update.message.from_user.full_name, time.time(), GCT_SERVER_STATE.DONE)
