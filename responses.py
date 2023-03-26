@@ -426,6 +426,14 @@ response_map = [
         if_contains_word('friend', 'friends'),
         lambda update: '<video>friends.mp4'
     ),
+    # Messages mentioning hamburgers or steamed hams.
+    (
+        logical_or(
+            if_contains_word('hamburger', 'cheeseburger'),
+            if_contains('steamed ham')
+        ),
+        lambda update: '<video>Steamed Hams.mp4'
+    ),
     # Randomly send images of mao zedong and the social credit/malice notices.
     (
         lambda _: True,
