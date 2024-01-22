@@ -24,12 +24,18 @@ xi_bot.set_params(temperature=config["temperature"])
 
 # Convert string to negative value
 def deduct(value):
-    return -int(value)
+    value = -int(value)
+    if value < -100:
+        value = -100
+    return value
 
 
 # Convert string to value
 def grant(value):
-    return int(value)
+    value = int(value)
+    if value > 100:
+        value = 100
+    return value
 
 
 available_functions = {"grant_social_credit": grant, "deduct_social_credit": deduct}
@@ -71,8 +77,9 @@ def generate_response(update: Update, context):
     try:
         social_credits = get_reputation(update)
         social_credit_message = f"{username} has {str(social_credits)} social credits."
+        text = message.text.replace(message.bot.name, f"Xi Jinping")
         xi_bot.system_message(social_credit_message)
-        result = xi_bot.send_message(username, message.text, max_new_tokens=config["max_new_tokens"])
+        result = xi_bot.send_message(username, text, max_new_tokens=config["max_new_tokens"])
         cleaned = find_functions(result, update)
         message.reply_text(cleaned)
     except:
