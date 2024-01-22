@@ -1,3 +1,4 @@
+import json
 from file_manager import file_manager
 
 from telegram import InputFile
@@ -9,6 +10,7 @@ from os import path
 asset_folder = './assets/'
 file_id_manager = file_manager(asset_folder)
 
+config = json.load(open(f"{asset_folder}/config.json", "r", encoding='utf-8'))
 
 def nth(n): return lambda arr: arr[n]
 

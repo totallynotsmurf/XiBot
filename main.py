@@ -7,6 +7,8 @@ from revbot_notifier import *
 from reputation import *
 from common import *
 from userid_map import *
+from filters import mention, botreply
+from text_generation.response import generate_response
 
 import conversations.good_citizen_test as GCT
 import os.path as path
@@ -48,8 +50,10 @@ dispatcher.add_handler(GCT.make_handler())
 
 dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_title, bind_args(on_server_name_changed)))
 dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, lambda u, c: send_reply(u, c, 'Ni Hao!')))
-dispatcher.add_handler(MessageHandler(Filters.all & (~Filters.command), bind_updater(respond)))
+dispatcher.add_handler(MessageHandler(Filters.all & ~Filters.command & ~botreply() & ~mention(updater.bot.username), bind_updater(respond)))
 dispatcher.add_handler(MessageHandler(Filters.all, lambda u, c: set_id(u)), group = 1)
+if config["enable_text_generation"] and config["tgi_url"]:
+    dispatcher.add_handler(MessageHandler(botreply() | mention(updater.bot.username), generate_response))
 
 add_command(dispatcher, command_show_reputation,  'show_score')
 add_command(dispatcher, command_reset_reputation, 'reset_score')
