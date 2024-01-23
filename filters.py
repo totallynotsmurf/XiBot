@@ -4,22 +4,23 @@ from telegram import Message
 from text_matchers import if_contains_word
 
 
-class _Mention(MessageFilter):
+class MentionBot(MessageFilter):
+    """Filter to match mentions of the bot."""
 
     def filter(self, message: Message):
         return if_contains_word(message.bot.name)(message.text)
 
 
-class _BotReply(MessageFilter):
+class BotReply(MessageFilter):
+    """Filter to match replies to a bot message."""
 
     def filter(self, message: Message):
-        if message.reply_to_message != None:
+        if message.reply_to_message is not None:
             return message.bot.username == message.reply_to_message.from_user.username
+
         return False
 
 
-def mention():
-    return _Mention()
-
-def botreply():
-    return _BotReply()
+class XiBotFilters:
+    mentions_bot = MentionBot()
+    reply_to_bot = BotReply()
