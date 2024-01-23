@@ -7,12 +7,34 @@ from telegram.ext import CommandHandler
 from os import path
 
 
-asset_folder = './assets/'
+def try_load_config(config_path, required_keys = ()):
+    contents = json.load(open(config_path, 'r')) if path.exists(config_path) else None
+
+    if contents is not None:
+        for key in required_keys:
+            if key not in contents:
+                print(f'Configuration file {config_path} is missing required key {key} and will not be used.')
+                return None
+
+    return contents
+
+
+asset_folder     = './assets/'
 file_id_manager = file_manager(asset_folder)
 
-config = json.load(open(f"{asset_folder}/config.json", "r", encoding='utf-8'))
+config_path     = f"{asset_folder}/config.json"
+api_auth_path   = f"{asset_folder}/api_auth.json"
+
+config          = try_load_config(config_path, { 'enable_text_generation', 'temperature', 'max_new_tokens' })
+api_auth_config = try_load_config(api_auth_path, { 'url' })
+
+if not api_auth_config: config['enable_text_generation'] = False
+
 
 def nth(n): return lambda arr: arr[n]
+
+
+def clamp(x, lower, upper): max(min(x, upper), lower)
 
 
 def display_user(user):
