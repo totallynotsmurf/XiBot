@@ -34,7 +34,7 @@ if not api_auth_config: config['enable_text_generation'] = False
 def nth(n): return lambda arr: arr[n]
 
 
-def clamp(x, lower, upper): max(min(x, upper), lower)
+def clamp(x, lower, upper): return max(min(x, upper), lower)
 
 
 def display_user(user):

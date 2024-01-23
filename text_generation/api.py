@@ -111,6 +111,7 @@ class ChatBot(GenerationBase):
                     # Run twice so we can call handlers with unprocessed text.
                     for pattern, handler in self.functions:
                         matches = re.findall(pattern, result_text)
+
                         for match in matches: handler(match, result_text, update)
 
                     for pattern, handler in self.functions:

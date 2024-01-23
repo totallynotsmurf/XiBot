@@ -48,16 +48,16 @@ chatbot_factory = ChatbotFactory()
 
 def get_xi_jinping_chatbot():
     def grant_social_credit(match, response, update):
-        try: value = int(match.group(1))
+        try: value = int(match[0])
         except: return
 
-        update_reputation(+clamp(abs(value), 0, 100), update)
+        update_reputation(1 * clamp(abs(value), 0, 100), update)
 
     def deduct_social_credit(match, response, update):
-        try: value = int(match.group(1))
+        try: value = int(match[0])
         except: return
 
-        update_reputation(-clamp(abs(value), 0, 100), update)
+        update_reputation(-1 * clamp(abs(value), 0, 100), update)
 
     def describe_user(update):
         return f'{update.message.from_user.full_name} currently has {str(get_reputation(update))} social credits.'
