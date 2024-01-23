@@ -52,7 +52,7 @@ dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_title, bind
 dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, lambda u, c: send_reply(u, c, 'Ni Hao!')))
 dispatcher.add_handler(MessageHandler(Filters.all & ~Filters.command & ~botreply() & ~mention(), bind_updater(respond)))
 dispatcher.add_handler(MessageHandler(Filters.all, lambda u, c: set_id(u)), group = 1)
-if config["enable_text_generation"] and config["tgi_url"]:
+if config["enable_text_generation"]:
     dispatcher.add_handler(MessageHandler(botreply() | mention(), generate_response))
 
 add_command(dispatcher, command_show_reputation,  'show_score')

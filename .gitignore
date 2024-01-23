@@ -2,7 +2,7 @@ assets/token.txt
 assets/reputation.json
 assets/user_ids.json
 assets/file_ids.json
-assets/api_key.txt
+assets/api_auth.json
 tests
 
 venv/

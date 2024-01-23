@@ -1,3 +1,4 @@
+import json
 import os
 
 from telegram import Update
@@ -7,16 +8,23 @@ from responses import change_score, get_reputation
 from common import asset_folder, config
 
 
-api_key_file = f"{asset_folder}/api_key.txt"
+api_key_file = f"{asset_folder}/api_auth.json"
 
+api_auth = {}
 if os.path.isfile(api_key_file):
-    api_key = open(api_key_file, "r", encoding='utf-8').read()
+    api_auth = json.load(open(api_key_file, "r", encoding='utf-8'))
 else:
-    api_key = ""
+    print(
+        "Text generation is enabled in the configuration but no API configuration file was found. Text generation will not be enabled for this session.\n"
+        "Please provide the file assets/api.json with the following keys to enable text generation: api_key, url, username.\n"
+        "The fields api_key and username may be omitted if the service at the provided URL does not require them."
+    )
+
+if not api_auth.get("tgi_url"):
+    config["enable_text_generation"] = False
 
 personality_file = f"{asset_folder}/gpt_personality.json"
-
-api_config = {"url": config["tgi_url"], "username": config["api_username"], "api_key": api_key}
+api_config = {"url": api_auth.get("tgi_url"), "username": api_auth.get("username"), "api_key": api_auth.get("api_key")}
 api = API(**api_config)
 xi_bot = api.load_chatbot(personality_file)
 xi_bot.set_params(temperature=config["temperature"])
